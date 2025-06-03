@@ -2,13 +2,18 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"net/http"
+	"os"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/adaptor"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/template/html/v2"
+	"github.com/mark3labs/mcp-go/server"
 )
 
 func parseEngines(enginesParam string) []string {
@@ -31,51 +36,18 @@ func searchHandler(c *fiber.Ctx) error {
 
 	startTime := time.Now()
 
-	var (
-		allResults []SearchResult
-		mu         sync.Mutex
-		wg         sync.WaitGroup
-	)
-
 	_, cancel := context.WithTimeout(c.Context(), 10*time.Second)
 	defer cancel()
 
-	type searchProvider func(query string) ([]SearchResult, error)
-
-	engineMap := map[string]searchProvider{
-		"duckduckgo": fetchDuckDuckGo,
-		"brave":      fetchBrave,
-		"wikipedia":  fetchWikipedia,
-	}
-
-	for _, engineName := range selectedEngines {
-		if provider, ok := engineMap[engineName]; ok {
-			wg.Add(1)
-			go func(p searchProvider) {
-				defer wg.Done()
-				results, err := p(query)
-				if err != nil {
-					log.Printf("Search provider error (%s): %v", engineName, err)
-					return
-				}
-				mu.Lock()
-				allResults = append(allResults, results...)
-				mu.Unlock()
-			}(provider)
-		} else {
-			log.Printf("Unknown engine: %s", engineName)
-		}
-	}
-
-	wg.Wait() // Wait for all goroutines to finish
+	results := runQuery(query, selectedEngines)
 
 	if format == "json" {
-		return c.JSON(allResults)
+		return c.JSON(results)
 	}
 
 	return c.Render("results", fiber.Map{
 		"Query":     query,
-		"Results":   allResults,
+		"Results":   results,
 		"FetchTime": time.Since(startTime).Seconds(),
 	})
 }
@@ -85,10 +57,34 @@ func main() {
 	app := fiber.New(fiber.Config{
 		Views: engine,
 	})
+	app.Use(logger.New())
 
-	app.Static("/", "./static")
+	httpServer := &http.Server{
+		Addr:    ":8080",
+		Handler: adaptor.FiberApp(app),
+	}
+	mcpServer := NewMCPServer()
 
+	// server.NewStreamableHTTPServer(
+	// 	mcpServer,
+	// 	server.WithStreamableHTTPServer(httpServer),
+	// 	server.WithEndpointPath("mcp"),
+	// )
+	sseServer := server.NewSSEServer(
+		mcpServer,
+		server.WithHTTPServer(httpServer),
+		server.WithStaticBasePath("/mcp"),
+		server.WithBaseURL("http://localhost:8080"),
+	)
+	app.All("/mcp/sse", adaptor.HTTPHandler(sseServer.SSEHandler()))
+	app.All("/mcp/message", adaptor.HTTPHandler(sseServer.MessageHandler()))
+
+	cwd, _ := os.Getwd()
 	app.Get("/search", searchHandler)
+	app.Static("/", fmt.Sprintf("%s/static", cwd))
 
-	log.Fatal(app.Listen(":8080"))
+	log.Printf("Server listening on %s", httpServer.Addr)
+	if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatalf("listen: %s\n", err)
+	}
 }
