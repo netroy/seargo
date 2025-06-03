@@ -15,7 +15,7 @@ func fetchBrave(query string) ([]SearchResult, error) {
 	client := http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest("GET", braveURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create Brave request: %w", err)
+		return nil, fmt.Errorf("failed to create brave request: %w", err)
 	}
 
 	req.Header.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:139.0) Gecko/20100101 Firefox/139.0")
@@ -25,7 +25,7 @@ func fetchBrave(query string) ([]SearchResult, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch from Brave: %w", err)
+		return nil, fmt.Errorf("failed to fetch from brave: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -35,7 +35,7 @@ func fetchBrave(query string) ([]SearchResult, error) {
 
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse Brave HTML response: %w", err)
+		return nil, fmt.Errorf("failed to parse brave HTML response: %w", err)
 	}
 
 	var results []SearchResult
