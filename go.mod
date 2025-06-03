@@ -1,4 +1,4 @@
-module netroy.in/personal-search
+module netroy.in/seargo
 
 go 1.24.3
 

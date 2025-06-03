@@ -5,10 +5,10 @@ dev:
 	go run .
 
 build:
-	go build -ldflags "-s -w" -o "personal-search"
+	go build -ldflags "-s -w" -o "seargo"
 
 build-docker:
-	docker build -t personal-search:dev .
+	docker build -t seargo:dev .
 
 test:
 	go test -v .

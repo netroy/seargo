@@ -10,7 +10,7 @@ RUN make build
 
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /app
-COPY --from=builder /src/personal-search /app/personal-search
+COPY --from=builder /src/seargo /app/seargo
 COPY templates /app/templates
 EXPOSE 8080
-ENTRYPOINT ["/app/personal-search"]
+ENTRYPOINT ["/app/seargo"]
