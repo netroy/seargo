@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results for "{{.Query}}"</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #202124;
+            --card-bg: #ffffff;
+            --border-color: #dfe1e5;
+            --link-color: #1a0dab;
+            --url-color: #4d5156;
+            --snippet-color: #4d5156;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #202124;
+                --text-color: #e8eaed;
+                --card-bg: #303134;
+                --border-color: #5f6368;
+                --link-color: #8ab4f8;
+                --url-color: #bdc1c6;
+                --snippet-color: #bdc1c6;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: normal;
+            color: var(--text-color);
+            margin-bottom: 30px;
+        }
+
+        .search-container {
+            margin-top: 20px;
+        }
+
+        .result-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .result-title {
+            font-size: 20px;
+            color: var(--link-color);
+            margin: 0 0 8px 0;
+            text-decoration: none;
+            display: block;
+        }
+
+        .result-url {
+            font-size: 14px;
+            color: var(--url-color);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .result-snippet {
+            font-size: 14px;
+            color: var(--snippet-color);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .engine-badge {
+            font-size: 12px;
+            color: var(--url-color);
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <h1>Results for "{{.Query}}"</h1>
+        {{range .Results}}
+        <div class="result-card">
+            <a href="{{.URL}}" class="result-title">{{.Title}}</a>
+            <span class="result-url">{{.URL}}</span>
+            <p class="result-snippet">{{.Content}}</p>
+            <span class="engine-badge">Source: {{.Engine}}</span>
+        </div>
+        {{end}}
+    </div>
+</body>
+</html>
