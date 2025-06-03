@@ -13,10 +13,41 @@ import (
 )
 
 type SearchResult struct {
-	Title   string `json:"title"`
-	URL     string `json:"url"`
-	Content string `json:"content"`
-	Engine  string `json:"engine"`
+	Title       string `json:"title"`
+	URL         string `json:"url"`
+	Description string `json:"description"`
+	Icon        string `json:"icon"`
+	Category    string `json:"category"`
+	Engine      string `json:"engine"`
+}
+
+type DDGResponse struct {
+	Abstract       string `json:"Abstract"`
+	AbstractText   string `json:"AbstractText"`
+	AbstractURL    string `json:"AbstractURL"`
+	AbstractSource string `json:"AbstractSource"`
+	Image          string `json:"Image"`
+	Heading        string `json:"Heading"`
+	Answer         string `json:"Answer"`
+	Redirect       string `json:"Redirect"`
+	RelatedTopics  []struct {
+		Result string `json:"Result"`
+		Icon   struct {
+			URL string `json:"URL"`
+		} `json:"Icon"`
+		FirstURL string `json:"FirstURL"`
+		Text     string `json:"Text"`
+	} `json:"RelatedTopics"`
+	Results []struct {
+		Result string `json:"Result"`
+		Icon   struct {
+			URL    string `json:"URL"`
+			Height int    `json:"Height"`
+			Width  int    `json:"Width"`
+		} `json:"Icon"`
+		FirstURL string `json:"FirstURL"`
+		Text     string `json:"Text"`
+	} `json:"Results"`
 }
 
 func fetchDuckDuckGo(query string) ([]SearchResult, error) {
@@ -32,26 +63,49 @@ func fetchDuckDuckGo(query string) ([]SearchResult, error) {
 	}
 	defer resp.Body.Close()
 
-	var ddgResponse struct {
-		RelatedTopics []struct {
-			Name     string `json:"Name"`
-			Text     string `json:"Text"`
-			FirstURL string `json:"FirstURL"`
-		} `json:"RelatedTopics"`
-	}
-
+	var ddgResponse DDGResponse
 	if err := json.NewDecoder(resp.Body).Decode(&ddgResponse); err != nil {
 		return nil, fmt.Errorf("failed to decode DuckDuckGo response: %w", err)
 	}
 
 	var results []SearchResult
+
+	// Parse abstract/infobox result
+	if ddgResponse.AbstractURL != "" {
+		results = append(results, SearchResult{
+			Title:       ddgResponse.Heading,
+			URL:         ddgResponse.AbstractURL,
+			Description: ddgResponse.AbstractText,
+			Icon:        ddgResponse.Image,
+			Category:    "Infobox",
+			Engine:      "duckduckgo",
+		})
+	}
+
+	// Parse related topics
 	for _, topic := range ddgResponse.RelatedTopics {
 		if topic.FirstURL != "" {
 			results = append(results, SearchResult{
-				Title:   topic.Name,
-				URL:     topic.FirstURL,
-				Content: topic.Text,
-				Engine:  "duckduckgo",
+				Title:       topic.Text,
+				URL:         topic.FirstURL,
+				Description: topic.Text,
+				Icon:        topic.Icon.URL,
+				Category:    "Related",
+				Engine:      "duckduckgo",
+			})
+		}
+	}
+
+	// Parse regular results
+	for _, result := range ddgResponse.Results {
+		if result.FirstURL != "" {
+			results = append(results, SearchResult{
+				Title:       result.Text,
+				URL:         result.FirstURL,
+				Description: result.Text,
+				Icon:        result.Icon.URL,
+				Category:    "Web",
+				Engine:      "duckduckgo",
 			})
 		}
 	}
@@ -77,6 +131,7 @@ func main() {
 
 		format := c.Query("format", "html")
 
+		startTime := time.Now()
 		results, err := fetchDuckDuckGo(query)
 		if err != nil {
 			log.Printf("Search error: %v", err)
@@ -88,8 +143,9 @@ func main() {
 		}
 
 		return c.Render("results", fiber.Map{
-			"Query":   query,
-			"Results": results,
+			"Query":     query,
+			"Results":   results,
+			"FetchTime": time.Now().Sub(startTime).Seconds(),
 		})
 	})
 

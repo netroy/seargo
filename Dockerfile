@@ -9,6 +9,8 @@ COPY . /src
 RUN make build
 
 FROM gcr.io/distroless/static:nonroot
-COPY --from=builder /src/personal-search /usr/bin/personal-search
+WORKDIR /app
+COPY --from=builder /src/personal-search /app/personal-search
+COPY templates /app/templates
 EXPOSE 8080
-ENTRYPOINT ["/usr/bin/personal-search"]
+ENTRYPOINT ["/app/personal-search"]
