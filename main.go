@@ -123,6 +123,8 @@ func main() {
 		Views: engine,
 	})
 
+	app.Static("/static", "./static")
+
 	app.Get("/search", func(c *fiber.Ctx) error {
 		query := c.Query("q")
 		if query == "" {

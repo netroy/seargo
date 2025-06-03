@@ -1,0 +1,134 @@
+:root {
+  --bg-color: #ffffff;
+  --text-color: #202124;
+  --card-bg: #ffffff;
+  --border-color: #dfe1e5;
+  --link-color: #1a0dab;
+  --url-color: #4d5156;
+  --snippet-color: #4d5156;
+  --category-color: #70757a;
+  --icon-size: 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #202124;
+    --text-color: #e8eaed;
+    --card-bg: #303134;
+    --border-color: #3d3f42;
+    --link-color: #8ab4f8;
+    --url-color: #bdc1c6;
+    --snippet-color: #bdc1c6;
+    --category-color: #9aa0a6;
+  }
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  font-size: 16px;
+}
+
+h1 {
+  font-size: 1.25em;
+  font-weight: normal;
+  color: var(--text-color);
+  margin-bottom: 30px;
+}
+
+.search-form {
+  margin-bottom: 20px;
+}
+
+.search-form .logo {
+  fill: var(--text-color);
+  vertical-align: bottom;
+  padding: 0 10px;
+}
+
+.search-form input[type="text"] {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  width: 100%;
+  max-width: 600px;
+  font-size: 1em;
+  box-sizing: border-box;
+}
+
+.results-info {
+  font-size: 0.9em;
+  padding: 10px 4px;
+  text-align: right;
+  float: right;
+}
+
+.results-container {
+  margin-top: 20px;
+}
+
+.result-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.result-title {
+  font-size: 1.25em;
+  color: var(--link-color);
+  margin: 0;
+  text-decoration: none;
+}
+
+.result-title:hover {
+  text-decoration: underline;
+}
+
+.result-url {
+  font-size: 0.875em;
+  color: var(--url-color);
+  margin-bottom: 8px;
+  display: block;
+  word-break: break-all;
+}
+
+.result-description {
+  font-size: 0.875em;
+  color: var(--snippet-color);
+  line-height: 1.5;
+  margin: 8px 0;
+}
+
+.result-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.result-category {
+  font-size: 0.75em;
+  color: var(--category-color);
+  background-color: var(--card-bg);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.engine-badge {
+  font-size: 0.75em;
+  color: var(--category-color);
+}

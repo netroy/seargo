@@ -12,5 +12,6 @@ FROM gcr.io/distroless/static:nonroot
 WORKDIR /app
 COPY --from=builder /src/seargo /app/seargo
 COPY templates /app/templates
+COPY static /app/static
 EXPOSE 8080
 ENTRYPOINT ["/app/seargo"]
