@@ -1,6 +1,9 @@
 setup:
 	go mod download
 
+clean:
+	rm -f seargo
+
 dev:
 	go run .
 
